@@ -1,27 +1,31 @@
 import React, { useState } from 'react';
 
 const navItems = [
-    { href: '#bab-1', label: '1. Konsep Dasar' },
-    { href: '#bab-2', label: '2. Rangkaian Marx' },
-    { href: '#bab-3', label: '3. Analisis Rangkaian' },
-    { href: '#bab-4', label: '4. Faktor Kinerja' },
-    { href: '#bab-5', label: '5. Aplikasi' },
-    { href: '#bab-6', label: '6. Keselamatan' },
-    { href: '#bab-7', label: '7. Simulasi' },
-    { href: '#bab-8', label: '8. Kalkulator' },
+    { href: '#bab-1', id: 'bab-1', label: '1. Konsep Dasar' },
+    { href: '#bab-2', id: 'bab-2', label: '2. Rangkaian Marx' },
+    { href: '#bab-3', id: 'bab-3', label: '3. Analisis Rangkaian' },
+    { href: '#bab-4', id: 'bab-4', label: '4. Faktor Kinerja' },
+    { href: '#bab-5', id: 'bab-5', label: '5. Aplikasi' },
+    { href: '#bab-6', id: 'bab-6', label: '6. Keselamatan' },
+    { href: '#bab-7', id: 'bab-7', label: '7. Simulasi' },
+    { href: '#bab-8', id: 'bab-8', label: '8. Kalkulator' },
 ];
 
-const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () => void }> = ({ href, children, onClick }) => (
+const NavLink: React.FC<{ href: string; children: React.ReactNode; isActive: boolean; onClick?: () => void }> = ({ href, children, isActive, onClick }) => (
     <a 
       href={href} 
       onClick={onClick}
-      className="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+      className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+        isActive
+          ? 'bg-gray-700 text-white'
+          : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+      }`}
     >
         {children}
     </a>
 );
 
-const Navbar: React.FC = () => {
+const Navbar: React.FC<{ activeSection: string }> = ({ activeSection }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const toggleMenu = () => {
@@ -51,7 +55,7 @@ const Navbar: React.FC = () => {
              {/* Mobile Nav - Menu */}
             <div className={`${isOpen ? 'block' : 'hidden'} lg:hidden fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-95 z-40 p-4 pt-20`}>
                  <div className="space-y-1">
-                    {navItems.map(item => <NavLink key={item.href} href={item.href} onClick={closeMenu}>{item.label}</NavLink>)}
+                    {navItems.map(item => <NavLink key={item.href} href={item.href} isActive={activeSection === item.id} onClick={closeMenu}>{item.label}</NavLink>)}
                 </div>
             </div>
 
@@ -63,7 +67,7 @@ const Navbar: React.FC = () => {
                     <p className="text-xs text-teal-400">Navigasi Cepat</p>
                 </div>
                 <nav className="mt-4 px-2 space-y-1">
-                    {navItems.map(item => <NavLink key={item.href} href={item.href}>{item.label}</NavLink>)}
+                    {navItems.map(item => <NavLink key={item.href} href={item.href} isActive={activeSection === item.id}>{item.label}</NavLink>)}
                 </nav>
             </aside>
         </>

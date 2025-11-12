@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -8,10 +8,36 @@ import Calculator from './components/Calculator';
 import CircuitDiagram from './components/CircuitDiagram';
 
 function App() {
+  const [activeSection, setActiveSection] = useState('');
+  const mainContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: '-50% 0px -50% 0px', // Trigger when the element is in the middle of the viewport
+        threshold: 0
+      }
+    );
+
+    const sections = mainContentRef.current?.querySelectorAll('section[id]');
+    sections?.forEach((section) => observer.observe(section));
+
+    return () => {
+      sections?.forEach((section) => observer.unobserve(section));
+    };
+  }, []);
+
   return (
     <div className="bg-gray-900 min-h-screen text-white font-sans">
-      <Navbar />
-      <div className="lg:pl-64">
+      <Navbar activeSection={activeSection} />
+      <div className="lg:pl-64" ref={mainContentRef}>
         <Header />
         <main className="container mx-auto p-4 md:p-8 max-w-4xl space-y-12">
           <Section title="1. Konsep Dasar Tegangan Impuls" id="bab-1">
