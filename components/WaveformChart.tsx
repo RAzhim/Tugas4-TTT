@@ -14,18 +14,83 @@ const WaveformChart: React.FC<WaveformChartProps> = ({ data, peakVoltage, frontT
     const chartRef = useRef<Chart | null>(null);
 
     useEffect(() => {
-        if (!canvasRef.current || !data) return;
+        if (!canvasRef.current || !data || data.length === 0) return;
 
         const ctx = canvasRef.current.getContext('2d');
         if (!ctx) return;
         
-        // Destroy previous chart instance to prevent memory leaks
         if (chartRef.current) {
             chartRef.current.destroy();
         }
 
         const labels = data.map(p => p.time);
         const voltageData = data.map(p => p.voltage);
+
+        const annotationPlugin = {
+            id: 'waveformAnnotations',
+            afterDraw: (chart: Chart) => {
+                const { ctx, chartArea: { top, bottom, left, right }, scales: { x, y } } = chart;
+                ctx.save();
+                
+                // --- Peak Voltage Annotation ---
+                const peakY = y.getPixelForValue(peakVoltage);
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(left, peakY);
+                ctx.lineTo(right, peakY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // --- Front Time (T1) Annotation ---
+                const frontTimeX = x.getPixelForValue(frontTime);
+                if(frontTimeX >= left && frontTimeX <= right) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#F6E05E'; // yellow
+                    ctx.lineWidth = 1;
+                    ctx.moveTo(frontTimeX, top);
+                    ctx.lineTo(frontTimeX, bottom);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#F6E05E';
+                    ctx.font = '10px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`T1: ${frontTime.toFixed(2)}µs`, frontTimeX, top + 10);
+                }
+
+                // --- Tail Time (T2) Annotation ---
+                const halfPeakY = y.getPixelForValue(peakVoltage / 2);
+                const tailTimeX = x.getPixelForValue(tailTime);
+
+                if (tailTimeX >= left && tailTimeX <= right) {
+                     // 50% line
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([2, 3]);
+                    ctx.moveTo(left, halfPeakY);
+                    ctx.lineTo(tailTimeX, halfPeakY);
+                    ctx.stroke();
+
+                    // T2 line
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#68D391'; // green
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([]);
+                    ctx.moveTo(tailTimeX, top);
+                    ctx.lineTo(tailTimeX, bottom);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#68D391';
+                    ctx.font = '10px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`T2: ${tailTime.toFixed(2)}µs`, tailTimeX, top + 25);
+                }
+
+                ctx.restore();
+            }
+        };
 
         chartRef.current = new Chart(ctx, {
             type: 'line',
@@ -43,6 +108,7 @@ const WaveformChart: React.FC<WaveformChartProps> = ({ data, peakVoltage, frontT
                     },
                 ]
             },
+            plugins: [annotationPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -72,7 +138,7 @@ const WaveformChart: React.FC<WaveformChartProps> = ({ data, peakVoltage, frontT
                             color: '#A0AEC0',
                         },
                         min: 0,
-                        max: 110,
+                        max: Math.max(110, peakVoltage * 1.1),
                         ticks: {
                             color: '#A0AEC0',
                         },
@@ -116,7 +182,6 @@ const WaveformChart: React.FC<WaveformChartProps> = ({ data, peakVoltage, frontT
             }
         });
 
-        // Cleanup function to destroy chart on component unmount
         return () => {
             if (chartRef.current) {
                 chartRef.current.destroy();
