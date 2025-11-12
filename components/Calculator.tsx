@@ -1,10 +1,13 @@
 import React, { useState, useMemo } from 'react';
 
-const InputField: React.FC<{ label: string; value: number; unit: string; onChange: (value: number) => void; step?: number }> = ({ label, value, unit, onChange, step = 1 }) => (
+const InputField: React.FC<{ label: string; value: number; unit: string; onChange: (value: number) => void; step?: number }> = ({ label, value, unit, onChange, step = 1 }) => {
+    const inputId = `input-${label.replace(/\s+/g, '-')}`;
+    return (
     <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
+        <label htmlFor={inputId} className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
         <div className="flex items-center bg-gray-700 rounded-md">
             <input
+                id={inputId}
                 type="number"
                 value={value}
                 onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
@@ -14,7 +17,7 @@ const InputField: React.FC<{ label: string; value: number; unit: string; onChang
             <span className="text-gray-400 pr-3">{unit}</span>
         </div>
     </div>
-);
+)};
 
 const Calculator: React.FC = () => {
     const [targetT1, setTargetT1] = useState(1.2); // µs

@@ -10,13 +10,16 @@ interface SimulatorParams {
     c2: number; // Load Capacitance (pF)
 }
 
-const ParameterSlider: React.FC<{label: string, value: number, min: number, max: number, step: number, unit: string, onChange: (value: number) => void}> = ({ label, value, min, max, step, unit, onChange }) => (
+const ParameterSlider: React.FC<{label: string, value: number, min: number, max: number, step: number, unit: string, onChange: (value: number) => void}> = ({ label, value, min, max, step, unit, onChange }) => {
+    const inputId = `slider-${label.replace(/\s+/g, '-')}`;
+    return (
     <div className="flex flex-col space-y-2">
-        <label className="flex justify-between items-center text-sm font-medium text-gray-300">
+        <label htmlFor={inputId} className="flex justify-between items-center text-sm font-medium text-gray-300">
             <span>{label}</span>
             <span className="font-mono bg-gray-700 text-teal-300 px-2 py-1 rounded">{value} {unit}</span>
         </label>
         <input
+            id={inputId}
             type="range"
             min={min}
             max={max}
@@ -26,7 +29,7 @@ const ParameterSlider: React.FC<{label: string, value: number, min: number, max:
             className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
         />
     </div>
-);
+)};
 
 
 const Simulator: React.FC = () => {
