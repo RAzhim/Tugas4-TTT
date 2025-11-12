@@ -1,0 +1,5 @@
+{
+  "name": "Simulasi Pembangkitan Tegangan Tinggi Impuls",
+  "description": "A web application that explains and simulates the generation of high voltage impulses using a Marx generator, including an interactive waveform simulator.",
+  "requestFramePermissions": []
+}
